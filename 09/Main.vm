@@ -1,0 +1,50 @@
+function Main.main 4
+call Strings.showIntro 0
+pop temp 0
+push constant 0
+pop local 2
+label WHILE_EXP0
+push local 2
+not
+not
+if-goto WHILE_END0
+call Strings.getNumber 0
+pop local 1
+push local 1
+call Pattern.new 1
+pop local 0
+push local 0
+call Pattern.drawFirstQuadrant 1
+pop temp 0
+push local 0
+call Pattern.drawSecondQuadrant 1
+pop temp 0
+push local 0
+call Pattern.drawThirdQuadrant 1
+pop temp 0
+push local 0
+call Pattern.drawFourthQuadrant 1
+pop temp 0
+push local 0
+call Pattern.dispose 1
+pop temp 0
+push constant 7
+call Strings.eraseLine 1
+pop temp 0
+call Strings.getRestart 0
+pop local 3
+push local 3
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+not
+pop local 2
+label IF_FALSE0
+goto WHILE_EXP0
+label WHILE_END0
+call Strings.showEnding 0
+pop temp 0
+push constant 0
+return

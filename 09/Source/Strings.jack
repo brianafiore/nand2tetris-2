@@ -1,0 +1,84 @@
+//Contains functions to show text
+// on the screen and take input from the user
+
+class Strings{
+
+	/** Returns a number from user's input */
+	function int getNumber(){
+		var int n;
+		do Output.moveCursor(7,0);
+		//readInt already handles invalid input
+		let n = Keyboard.readInt("Enter a number: ");
+
+		return n;
+	}
+
+	/** Shows the intro text */
+	function void showIntro(){
+		do Screen.clearScreen();
+		do Output.moveCursor(1,0);
+		do Output.printString("Pattern Generator");
+		do Output.moveCursor(3,0);
+		do Output.printString("Use 16bit integers to");
+		do Output.println();
+		do Output.printString("generate cool diamond");
+		do Output.println();
+		do Output.printString("shaped patterns!");
+
+		return;
+	}
+
+	/** Takes Y or N input and returns true if the user wishes to restart */
+	function boolean getRestart(){
+		var char c;
+		var boolean exit;
+		var boolean restart;
+
+		do Output.moveCursor(9,0);
+		do Output.printString("Create a new Pattern?"); 
+
+		let exit = false;
+		let restart = false;
+
+		while(~exit){
+			do Output.moveCursor(10,0);
+			do Output.printString("(Y/N):"); 			
+			let c = Keyboard.readChar();
+
+			//89 = Y, 78 = N
+			if((c = 89) | (c = 78)){
+				let exit = true;
+				if(c = 89){
+					let restart = true;
+				}
+			} else {
+				do Output.moveCursor(11,0);
+				do Output.printString("Please type Y or N");
+				do Sys.wait(1500);
+				do Strings.eraseLine(11);
+			}
+		}
+
+		return restart;
+	}
+
+	/** Draws a white rectangle overriding a line */
+	function void eraseLine(int line){
+		var int sX, sY, eX, eY;
+		let sX = 0;
+		let sY = (line*11)+1;
+		let eX = sX+255;
+		let eY = sY+15;
+
+		do Screen.setColor(false);
+		do Screen.drawRectangle(sX, sY, eX, eY);
+		return;
+	}
+
+	function void showEnding(){
+		do Output.moveCursor(13,0);
+		do Output.printString("Thank you for Playing!");
+		return;
+	}
+
+}

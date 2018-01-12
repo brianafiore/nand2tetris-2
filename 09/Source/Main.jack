@@ -1,0 +1,41 @@
+//Main class of the program
+//
+//Creates a diamond shaped pattern using
+//the bits from an integer provided by the user.
+//
+
+class Main{
+
+	function void main(){
+		
+		var Pattern p;
+		var int seed;
+		var boolean exit;
+		var boolean restart;
+
+		do Strings.showIntro();
+
+		let exit = false;
+		while(~exit){
+			let seed = Strings.getNumber();
+
+			let p = Pattern.new(seed);
+			do p.drawFirstQuadrant();
+			do p.drawSecondQuadrant();
+			do p.drawThirdQuadrant();
+			do p.drawFourthQuadrant();
+			do p.dispose();
+
+			do Strings.eraseLine(7);
+			let restart = Strings.getRestart();
+			if(~restart){
+				let exit = true;
+			}
+		}
+
+		do Strings.showEnding();
+		return;
+	}
+ 
+}
+

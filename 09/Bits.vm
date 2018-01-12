@@ -1,0 +1,76 @@
+function Bits.rotateLeft 1
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push argument 1
+lt
+not
+if-goto WHILE_END0
+push argument 0
+push constant 0
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push argument 0
+push constant 2
+call Math.multiply 2
+push constant 1
+add
+pop argument 0
+goto IF_END0
+label IF_FALSE0
+push argument 0
+push constant 2
+call Math.multiply 2
+pop argument 0
+label IF_END0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push argument 0
+return
+function Bits.mirror 3
+push constant 0
+pop local 0
+push constant 1
+pop local 1
+push constant 0
+pop local 2
+label WHILE_EXP0
+push local 0
+push constant 16
+lt
+not
+if-goto WHILE_END0
+push argument 0
+push constant 0
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 2
+push local 1
+add
+pop local 2
+label IF_FALSE0
+push argument 0
+push constant 2
+call Math.multiply 2
+pop argument 0
+push local 0
+push constant 1
+add
+pop local 0
+push local 1
+push constant 2
+call Math.multiply 2
+pop local 1
+goto WHILE_EXP0
+label WHILE_END0
+push local 2
+return

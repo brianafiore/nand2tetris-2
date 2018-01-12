@@ -1,0 +1,43 @@
+//Handles bit operations necessary
+//to draw the patterns.
+
+class Bits{
+
+	/** Rotates left the bits of an integer n by the number of times */
+	function int rotateLeft(int n, int times){
+		var int count;
+		let count = 0;
+
+		while(count < times){
+			if(n < 0){
+					let n = (n*2)+1;
+				} else{
+					let n = n*2;
+				}
+			let count = count + 1;
+		}
+		return n;
+	}
+
+	/** Mirrors the bits from an integer n */
+	function int mirror(int n){
+		var int count;
+		var int adder;
+		var int mirrored;
+
+		let count = 0;
+		let adder = 1;
+		let mirrored = 0;
+
+		while(count < 16){
+			if(n < 0){
+					//MSB = 1;
+					let mirrored = mirrored+adder;
+				}
+			let n = (n*2); //left shift number
+			let count = count + 1; //increment counter
+			let adder = adder*2; //shift adder bit
+		}
+		return mirrored;
+	}
+}

@@ -1,0 +1,161 @@
+//Handles the pattern creation.
+//Every quadrant has a unique start and end address
+//in order to create the shape aligned perfectly.
+//So it was decided to make a method for each quadrant
+//in the following order:
+//
+// Quadrants
+// _2_|_1_
+//  3 | 4
+//
+
+class Pattern{
+
+	field int seed;
+	field int topDownOffset;
+	field int bottomUpOffset;
+
+	field int topCenter;
+	field int middleLeft;
+	field int middleRight;
+	field int bottomCenter;
+
+	//address pointer for writing
+	field int pokeAddress;
+	
+	constructor Pattern new(int Aseed){
+		let seed = Aseed;
+		let topDownOffset = 24;
+		let bottomUpOffset = 40;
+
+		//screen positions in memory
+		let topCenter = 16408;
+		let middleLeft = 20528;
+		let middleRight = 20544;
+		let bottomCenter = 24568;
+
+		return this;
+	}
+
+	/** Disposes this object */
+	method void dispose(){
+		do Memory.deAlloc(this);
+		return;
+	}
+
+	/** Draws the first Quadrant from top to bottom */
+	method void drawFirstQuadrant(){
+		var boolean exit;
+		var int pokeCount;
+		var int word;
+
+		let exit = false;
+		let pokeAddress = topCenter; //starting point
+		let pokeCount = 0;
+
+		//mirror for symmetry
+		let word = Bits.mirror(seed);
+
+		while(~exit){
+			do Memory.poke(pokeAddress, word);
+			let pokeCount = pokeCount+1;
+			if(pokeCount > 7){
+
+				let word = Bits.rotateLeft(word, 1);
+				let pokeAddress = pokeAddress+topDownOffset; //jump to new line
+				let pokeCount = 0; //reset X increment
+			}
+			let pokeAddress = pokeAddress+1;
+
+			if(pokeAddress > middleRight){ let exit = true; } //ending point
+		}
+		return;
+	}
+
+	/** Draws the second Quadrant from bottom to top */
+	method void drawSecondQuadrant(){
+		var boolean exit;
+		var int pokeCount;
+		var int word;
+
+		let exit = false;
+		let pokeAddress = middleLeft; //starting point
+		let pokeCount = 0;
+
+		let word = seed;
+
+		while(~exit){
+			do Memory.poke(pokeAddress, word);
+			let pokeCount = pokeCount+1;
+			if(pokeCount > 7){
+
+				let word = Bits.rotateLeft(word, 1);
+				let pokeAddress = pokeAddress-bottomUpOffset; //jump to new line
+				let pokeCount = 0; //reset X increment
+			}
+			let pokeAddress = pokeAddress+1;
+
+			if(pokeAddress < (topCenter-40)){ let exit = true; } //ending point
+		}
+		return;
+	}
+
+	/** Draws the third Quadrant from top to bottom */
+	method void drawThirdQuadrant(){
+		var boolean exit;
+		var int pokeCount;
+		var int word;
+
+		let exit = false;
+		let pokeAddress = middleLeft; //starting point
+		let pokeCount = 0;
+
+		let word = seed;
+
+		while(~exit){
+			do Memory.poke(pokeAddress, word);
+			let pokeCount = pokeCount+1;
+			if(pokeCount > 7){
+
+				let word = Bits.rotateLeft(word, 1);
+				let pokeAddress = pokeAddress+topDownOffset; //jump to new line
+				let pokeCount = 0; //reset X increment
+			}
+			let pokeAddress = pokeAddress+1;
+
+			if(pokeAddress > bottomCenter){ let exit = true; } //ending point
+		}
+		return;
+	}
+
+
+	/** Draws the fourth Quadrant from bottom to top */
+	method void drawFourthQuadrant(){
+		var boolean exit;
+		var int pokeCount;
+		var int word;
+
+		let exit = false;
+		let pokeAddress = bottomCenter; //starting point
+		let pokeCount = 0;
+
+		let word = Bits.mirror(seed);
+		let word = Bits.rotateLeft(word, 3); //for alignment
+
+		while(~exit){
+			do Memory.poke(pokeAddress, word);
+			let pokeCount = pokeCount+1;
+			if(pokeCount > 7){
+
+				let word = Bits.rotateLeft(word, 1);
+				let pokeAddress = pokeAddress-bottomUpOffset; //jump to new line
+				let pokeCount = 0; //reset X increment
+			}
+			let pokeAddress = pokeAddress+1;
+
+			if(pokeAddress < middleRight){ let exit = true; } //ending point
+		}
+		return;
+	}
+
+}

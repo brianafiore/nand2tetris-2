@@ -1,0 +1,258 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * A library of functions for displaying graphics on the screen.
+ * The Hack physical screen consists of 512 rows (indexed 0..511, top to bottom)
+ * of 256 pixels each (indexed 0..255, left to right). The top left pixel on 
+ * the screen is indexed (0,0).
+ */
+class Screen {
+
+	static boolean color;
+	static Array screen;
+
+	/** Initializes the Screen. */
+	function void init() {
+		let color = true;
+		let screen = 16384;
+		return;
+	}
+
+	/** Erases the entire screen. */
+	function void clearScreen() {
+		var int address;
+		let address = 0; //starting address
+		while(address < 8192){
+			let screen[address] = false;
+			let address = address+1;
+		}
+		return;
+	}
+
+	/** Sets the current color, to be used for all subsequent drawXXX commands.
+	 *  Black is represented by true, white by false. */
+	function void setColor(boolean b) {
+		let color = b;
+		return;
+	}
+
+	/** Draws the (x,y) pixel, using the current color. */
+	function void drawPixel(int x, int y) {
+		var int address, mask;
+
+		let address = (y*32) + (x/16);
+		let mask = Math.getBit16(x&15); //pixel location from 16bit array
+
+		if(color){
+			//set pixel to black
+			let screen[address] = screen[address] | mask;
+		} else {
+			let screen[address] = screen[address] & ~mask;
+		}
+
+		return;
+	}
+
+	/** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+	function void drawLine(int x1, int y1, int x2, int y2) {
+		var int diff, a, b, dx, dy;
+		var int temp;
+
+		//swap starting point if right to left
+		if(x1 > x2) {
+			let temp = x1;
+			let x1 = x2;
+			let x2 = temp;
+
+			let temp = y1;
+			let y1 = y2;
+			let y2 = temp;
+		}
+		
+		let dx = x2-x1; //distance in x
+		let dy = y2-y1; //distance in y
+
+		if(dy = 0){
+			//horizontal
+			do Screen.drawHorizontalLine(x1, x2, y1);
+			return;
+		}
+
+		if(dx = 0){
+			//vertical
+			do Screen.drawVerticalLine(y1, y2, x1);
+			return;
+		}
+
+		//diagonal
+		let a = 0; //change in x
+		let b = 0; //change in y
+		let diff = 0; //deviation up/down
+
+		if(dy > 0){
+			//going down y1<y2
+			while(~(a > dy) & ~(b > dx)){
+
+				do Screen.drawPixel(x1+b, y1+a);
+				if(diff<0){
+					let a=a+1;
+					let diff=diff+dx;
+				} else {
+					let b=b+1;
+					let diff=diff-dy;
+				}
+			}
+
+		} else {
+			//going up dy<0
+			while(~(a < dy) & ~(b > dx)){
+
+				do Screen.drawPixel(x1+b, y1-a);
+				if(diff<0){
+					let a=a+1;
+					let diff=diff+dx;
+				} else {
+					//tilt up
+					let b=b+1;
+					let diff=diff+dy; //decrease diff
+				}
+			}
+		}
+		return;
+	}
+
+	/** Draws a filled rectangle whose top left corner is (x1, y1)
+	 * and bottom right corner is (x2,y2), using the current color. */
+	function void drawRectangle(int x1, int y1, int x2, int y2) {
+		
+		while (~(y1 > y2)){
+			do Screen.drawHorizontalLine(x1, x2, y1);
+			let y1 = y1 + 1;
+		}
+
+		return;
+	}
+
+	/** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+	function void drawCircle(int x, int y, int r) {
+		var int dy, dx, r2;
+
+		let dy = -r; //top
+		let r2 = r*r;
+
+		while(~(dy>r)){
+			let dx = Math.sqrt(r2-(dy*dy));
+			do Screen.drawHorizontalLine(x-dx, x+dx, y+dy);
+			let dy = dy + 1; //next line
+		}
+		return;
+	}
+
+	/**draws a horizontal line from left to right*/
+	function void drawHorizontalLine(int x1, int x2, int y) {
+		var int x1Addr, x2Addr, temp, xPos, diff;
+		var int line;
+
+		if(x1 = x2){
+			do Screen.drawPixel(x1, y);
+			return;
+		}
+
+		if(x1 > x2){
+			// swap
+			let temp = x1; //temp value
+			let x1 = x2;
+			let x2 = temp;
+		}
+
+		let x1Addr = x1/16; //div without remainder
+		let x2Addr = x2/16; //div without remainder
+		let y = 32*y; //convert to address
+
+		//get starting address
+		let xPos = x1-(x1Addr*16); //remainder
+		
+		//handle small lines
+		if(x1Addr = x2Addr){
+			//fill line
+			let line = Math.getBit16((x2-x1)+1) - 1; //5 = 0000000000011111 
+			while(xPos > 0){
+				let line = line+line;
+				let xPos = xPos-1;
+			}
+			do Screen.drawAtAddress(line, x1Addr+y);
+			return;
+		}
+
+		let line = -1; //1111111111111111
+
+		while(xPos > 0){
+			let line = line+line; //bit shift left trailing 0s
+			let xPos = xPos-1;
+		}
+
+		do Screen.drawAtAddress(line, x1Addr+y);
+
+		//fill in between start and end
+		let temp = x1Addr+1;
+		while(temp<x2Addr){
+			let screen[temp+y] = color;
+			let temp = temp+1;
+		}
+		
+		let line = -1; //1111111111111111
+
+		//get ending address
+		let xPos = x2-(x2Addr*16); //remainder
+
+		while(~(xPos < 0)){
+			let line = line+line; //bit shift left trailing 0s
+			let xPos = xPos-1;
+		}
+
+		do Screen.drawAtAddress(~line, x2Addr+y); //negate because it is the end
+
+		return;
+	}
+
+	/**draws a vertical line from top to bottom*/
+	function void drawVerticalLine(int y1, int y2, int x) {
+		var int temp, mask;
+
+		if(y1 > y2){
+			let temp = y1;
+			let y1 = y2;
+			let y2 = temp;
+		}
+
+		let mask = Math.getBit16(x&15); //pixel location from 16bit array
+		let temp = x/16; //x address
+
+		//convert to address
+		let y1 = y1*32;
+		let y2 = y2*32;
+
+		while(~(y1>y2)){
+			//set pixel to black
+			do Screen.drawAtAddress(mask, temp+y1);
+			let y1 = y1+32; //new line
+		}
+
+		return;
+	}
+
+	function void drawAtAddress(int mask, int address){
+		
+		if(color){
+			//set pixel to black
+			let screen[address] = screen[address] | mask;
+		} else {
+			let screen[address] = screen[address] & ~mask;
+		} 
+		
+		return;
+	}
+}

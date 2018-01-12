@@ -1,0 +1,96 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
+ */ 
+class Memory {
+
+    static Array ram;
+    static Array heap;
+
+    /** Initializes the class. */
+    function void init() {
+        let ram = 0;
+        let heap = 2048; //starting place in ram
+        let heap[0] = 0; //first address
+        let heap[1] = 14335; //length of heap
+        return;
+    }
+
+    /** Returns the RAM value at the given address. */
+    function int peek(int address) {
+        return ram[address];
+    }
+
+    /** Sets the RAM value at the given address to the given value. */
+    function void poke(int address, int value) {
+        let ram[address] = value;
+        return;
+    }
+
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. */
+    function int alloc(int size) {
+        //search for free block
+        var int next, freemem, block;
+        var boolean found;
+
+        let next = 0; //starting address for search
+        let freemem = heap[next+1];
+        let found = false;
+        while(~found){
+            if(~(freemem<(size+2))){
+                //heap[next+1] = block[1] 
+                //contains size of block
+                let found = true;
+            } else {
+                //not found, go to next address
+                let next = heap[next];
+                let freemem = heap[next+1];
+                if(next=0){
+                    //not found
+                    //defrag?
+                    return -1;
+                }
+            }
+        }
+
+        //set address of new block
+        let block = (next+freemem+2)-(size+2);
+        //erase reference
+        let heap[block] = 0;
+        let heap[block+1] = size;
+
+        //update free list size
+        let heap[next+1] = freemem-(size+2);
+
+        //return address of found block
+        return block;
+        
+    }
+
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(Array o) {
+        var int next;
+        var boolean listEnd;
+
+        let next = 0; //starting address for search
+        let listEnd = false;
+        while(~listEnd){
+            if(heap[next]=0){
+                //append object to end of free list
+                let heap[next] = o;
+                let listEnd = true;
+            }
+            //not the end of the list
+            let next = heap[next];
+        }
+        return;
+    }    
+}
